@@ -1,0 +1,71 @@
+import requests
+from bs4 import BeautifulSoup
+from nltk.tokenize import sent_tokenize
+
+# Task 1: Summarize the news from https://www.nytimes.com/
+
+# Retrieve HTML content from URL
+url = 'https://www.nytimes.com/'
+reqs = requests.get(url)
+if reqs.status_code != 200:
+    print(f"Error: Request to {url} failed with status code {reqs.status_code}")
+    exit()
+soup = BeautifulSoup(reqs.text, 'html.parser')
+
+# Extract headlines from HTML content
+headlines = []
+for heading in soup.find_all(['h1', 'h2', 'h3']):
+    headline = heading.get_text(strip=True)
+    if headline:
+        headlines.append(headline)
+
+# Summarize each news article in 10 lines or less
+summaries = []
+for headline in headlines:
+    article_url = f"{url}/2022/03/01/{headline.replace(' ', '-')}.html"
+    article_reqs = requests.get(article_url)
+    if article_reqs.status_code != 200:
+        print(f"Error: Request to {article_url} failed with status code {article_reqs.status_code}")
+        continue
+    article_soup = BeautifulSoup(article_reqs.text, 'html.parser')
+    article_text = article_soup.get_text(strip=True)
+    sentences = sent_tokenize(article_text)[:10]
+    summary = ' '.join(sentences)
+    summaries.append(f'{headline}\n{summary}')
+
+# Write summaries to file
+if summaries:
+    with open('./nyt-summaries.txt', 'w') as f:
+        for summary in summaries:
+            f.write(summary + '\n\n')
+else:
+    print("Error: No summaries generated")
+
+# Print all summaries
+for summary in summaries:
+    print(summary)
+
+
+# Task 2: Retrieve all the headlines from the main page of The New York Times
+
+# Retrieve HTML content from URL
+url = 'https://www.nytimes.com/'
+reqs = requests.get(url)
+if reqs.status_code != 200:
+    print(f"Error: Request to {url} failed with status code {reqs.status_code}")
+    exit()
+soup = BeautifulSoup(reqs.text, 'html.parser')
+
+# Extract headlines from HTML content
+headlines = []
+for heading in soup.find_all(['h1', 'h2', 'h3']):
+    headline = heading.get_text(strip=True)
+    if headline:
+        headlines.append(headline)
+
+# Print all headlines
+if headlines:
+    for headline in headlines:
+        print(headline)
+else:
+    print("Error: No headlines found")
